@@ -18,8 +18,8 @@ app.add_middleware(
         "*",  # Remove this in production and set the specific domain above
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["https://naveen-ja.netlify.app/"],
+    allow_headers=["https://naveen-ja.netlify.app/"],
 )
 
 # Register routers
