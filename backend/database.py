@@ -15,7 +15,6 @@ engine = create_async_engine(
     echo=False,
     pool_pre_ping=True,
     connect_args={
-        "prepared_statement_name_cache_size": 0,
         "statement_cache_size": 0,
     }
 )
