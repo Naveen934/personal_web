@@ -58,18 +58,15 @@ export default function SavingsTab() {
         e.preventDefault();
         setSaving(true);
         try {
-            const added = await createSaving({ ...form, value: +form.value });
-            setSavings(prev => [added, ...prev]);
-            setShowForm(false); setForm(EMPTY_FORM);
+            await createSaving({ ...form, value: +form.value });
+            setShowForm(false); setForm(EMPTY_FORM); await load();
         } catch (err) { console.error(err); }
         finally { setSaving(false); }
     };
 
     const handleDelete = async (item) => {
-        setSavings(prev => prev.filter(s => s.id !== item.id));
-        setDeleteConfirm(null);
-        try { await deleteSaving(item.id); }
-        catch (e) { console.error(e); await load(); }
+        try { await deleteSaving(item.id); setDeleteConfirm(null); await load(); }
+        catch (e) { console.error(e); }
     };
 
     const grouped = savings.reduce((acc, s) => {

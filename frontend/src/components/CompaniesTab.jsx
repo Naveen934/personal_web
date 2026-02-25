@@ -37,18 +37,15 @@ export default function CompaniesTab() {
         e.preventDefault();
         setSaving(true);
         try {
-            const added = await createCompany({ ...form, monthly_revenue: +form.monthly_revenue, total_invested: +form.total_invested });
-            setCompanies(prev => [added, ...prev]);
-            setShowForm(false); setForm(EMPTY_FORM);
+            await createCompany({ ...form, monthly_revenue: +form.monthly_revenue, total_invested: +form.total_invested });
+            setShowForm(false); setForm(EMPTY_FORM); await load();
         } catch (err) { console.error(err); }
         finally { setSaving(false); }
     };
 
     const handleDelete = async (id) => {
-        setCompanies(prev => prev.filter(c => c.id !== id));
-        setDeleteConfirm(null);
-        try { await deleteCompany(id); }
-        catch (e) { console.error(e); await load(); }
+        try { await deleteCompany(id); setDeleteConfirm(null); await load(); }
+        catch (e) { console.error(e); }
     };
 
     const handleDetail = async (id) => {

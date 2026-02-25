@@ -1,59 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Plus, Trash2, ExternalLink, Check, X } from 'lucide-react';
 import { getDocuments, createDocument, updateDocument, deleteDocument } from '../api';
-
-const EditableCell = ({ doc, field, isLink = false, editCell, editValue, setEditValue, commitEdit, cancelEdit, handleKeyDown, startEdit }) => {
-    const isEditing = editCell?.id === doc.id && editCell?.field === field;
-    const value = doc[field] || '';
-
-    if (isEditing) {
-        return (
-            <div className="flex items-center gap-1">
-                <input
-                    autoFocus
-                    className="input-field text-sm py-1 px-2 h-8 flex-1"
-                    value={editValue}
-                    onChange={e => setEditValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onBlur={commitEdit}
-                />
-                <button onMouseDown={(e) => { e.preventDefault(); commitEdit(); }} className="text-emerald-400 hover:text-emerald-300 p-1"><Check size={14} /></button>
-                <button onMouseDown={(e) => { e.preventDefault(); cancelEdit(); }} className="text-gray-500 hover:text-white p-1"><X size={14} /></button>
-            </div>
-        );
-    }
-
-    if (isLink && value) {
-        return (
-            <div className="flex items-center gap-1 group/cell cursor-pointer" onClick={() => startEdit(doc, field)}>
-                <a href={value} target="_blank" rel="noopener noreferrer"
-                    onClick={e => e.stopPropagation()}
-                    className="text-brand-400 hover:text-brand-300 flex items-center gap-1 text-sm truncate max-w-[180px]">
-                    Open Link <ExternalLink size={12} />
-                </a>
-                <span className="text-gray-600 text-xs ml-1 opacity-0 group-hover/cell:opacity-100 transition-opacity">(edit)</span>
-            </div>
-        );
-    }
-
-    return (
-        <div
-            className="cursor-pointer py-1 px-1 rounded hover:bg-dark-600 transition-colors text-sm text-gray-300 hover:text-white group/cell flex items-center gap-1 min-h-[32px]"
-            onClick={() => startEdit(doc, field)}
-        >
-            <span className={value ? '' : 'text-gray-600 italic'}>{value || 'Click to edit'}</span>
-        </div>
-    );
-};
-
 
 export default function DocumentsTab() {
     const [docs, setDocs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
-    const [editCell, setEditCell] = useState(null);
+    const [editCell, setEditCell] = useState(null); // { id, field }
     const [editValue, setEditValue] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+    const inputRef = useRef(null);
 
     const load = async () => {
         try { setDocs(await getDocuments()); }
@@ -63,12 +19,16 @@ export default function DocumentsTab() {
 
     useEffect(() => { load(); }, []);
 
+    useEffect(() => {
+        if (editCell && inputRef.current) inputRef.current.focus();
+    }, [editCell]);
 
     const handleAddRow = async () => {
         setAdding(true);
         try {
             const doc = await createDocument({ document_name: 'New Document', number: '', drive_link: '' });
-            setDocs(prev => [doc, ...prev]);
+            await load();
+            // Immediately enter edit mode for the new row name
             setEditCell({ id: doc.id, field: 'document_name' });
             setEditValue('New Document');
         } catch (e) { console.error(e); }
@@ -83,12 +43,11 @@ export default function DocumentsTab() {
     const commitEdit = async () => {
         if (!editCell) return;
         const { id, field } = editCell;
-        const newValue = editValue;
-        setDocs(prev => prev.map(d => d.id === id ? { ...d, [field]: newValue } : d));
-        setEditCell(null);
         try {
-            await updateDocument(id, { [field]: newValue });
+            const updated = await updateDocument(id, { [field]: editValue });
+            setDocs(prev => prev.map(d => d.id === id ? { ...d, ...updated } : d));
         } catch (e) { console.error(e); }
+        setEditCell(null);
     };
 
     const cancelEdit = () => setEditCell(null);
@@ -99,12 +58,53 @@ export default function DocumentsTab() {
     };
 
     const handleDelete = async (doc) => {
-        setDocs(prev => prev.filter(d => d.id !== doc.id));
-        setDeleteConfirm(null);
-        try { await deleteDocument(doc.id); }
-        catch (e) { console.error(e); await load(); }
+        try { await deleteDocument(doc.id); setDeleteConfirm(null); await load(); }
+        catch (e) { console.error(e); }
     };
 
+    const EditableCell = ({ doc, field, isLink = false }) => {
+        const isEditing = editCell?.id === doc.id && editCell?.field === field;
+        const value = doc[field] || '';
+
+        if (isEditing) {
+            return (
+                <div className="flex items-center gap-1">
+                    <input
+                        ref={inputRef}
+                        className="input-field text-sm py-1 px-2 h-8 flex-1"
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        onBlur={commitEdit}
+                    />
+                    <button onMouseDown={commitEdit} className="text-emerald-400 hover:text-emerald-300 p-1"><Check size={14} /></button>
+                    <button onMouseDown={cancelEdit} className="text-gray-500 hover:text-white p-1"><X size={14} /></button>
+                </div>
+            );
+        }
+
+        if (isLink && value) {
+            return (
+                <div className="flex items-center gap-1 group/cell cursor-pointer" onClick={() => startEdit(doc, field)}>
+                    <a href={value} target="_blank" rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="text-brand-400 hover:text-brand-300 flex items-center gap-1 text-sm truncate max-w-[180px]">
+                        Open Link <ExternalLink size={12} />
+                    </a>
+                    <span className="text-gray-600 text-xs ml-1 opacity-0 group-hover/cell:opacity-100 transition-opacity">(edit)</span>
+                </div>
+            );
+        }
+
+        return (
+            <div
+                className="cursor-pointer py-1 px-1 rounded hover:bg-dark-600 transition-colors text-sm text-gray-300 hover:text-white group/cell flex items-center gap-1 min-h-[32px]"
+                onClick={() => startEdit(doc, field)}
+            >
+                <span className={value ? '' : 'text-gray-600 italic'}>{value || 'Click to edit'}</span>
+            </div>
+        );
+    };
 
     if (loading) return <div className="flex items-center justify-center h-64 text-gray-500">Loading...</div>;
 
@@ -141,13 +141,13 @@ export default function DocumentsTab() {
                                 {docs.map((doc, idx) => (
                                     <tr key={doc.id} className={`hover:bg-dark-600/30 transition-colors ${idx % 2 === 0 ? '' : 'bg-dark-700/50'}`}>
                                         <td className="px-4 py-2 font-medium text-white">
-                                            <EditableCell doc={doc} field="document_name" editCell={editCell} editValue={editValue} setEditValue={setEditValue} commitEdit={commitEdit} cancelEdit={cancelEdit} handleKeyDown={handleKeyDown} startEdit={startEdit} />
+                                            <EditableCell doc={doc} field="document_name" />
                                         </td>
                                         <td className="px-4 py-2 text-gray-300 font-mono text-sm">
-                                            <EditableCell doc={doc} field="number" editCell={editCell} editValue={editValue} setEditValue={setEditValue} commitEdit={commitEdit} cancelEdit={cancelEdit} handleKeyDown={handleKeyDown} startEdit={startEdit} />
+                                            <EditableCell doc={doc} field="number" />
                                         </td>
                                         <td className="px-4 py-2">
-                                            <EditableCell doc={doc} field="drive_link" isLink editCell={editCell} editValue={editValue} setEditValue={setEditValue} commitEdit={commitEdit} cancelEdit={cancelEdit} handleKeyDown={handleKeyDown} startEdit={startEdit} />
+                                            <EditableCell doc={doc} field="drive_link" isLink />
                                         </td>
                                         <td className="px-3 py-2">
                                             <button onClick={() => setDeleteConfirm(doc)}
