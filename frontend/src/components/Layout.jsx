@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     Building2, PiggyBank, Landmark, FileText,
-    LayoutDashboard, Menu, X
+    LayoutDashboard, Menu, X, LogOut
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -11,7 +11,7 @@ const NAV_ITEMS = [
     { id: 'documents', label: 'Documents', icon: FileText },
 ];
 
-export default function Layout({ activeTab, onTabChange, children }) {
+export default function Layout({ activeTab, onTabChange, onLogout, children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
@@ -64,8 +64,17 @@ export default function Layout({ activeTab, onTabChange, children }) {
                 </nav>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-dark-600">
-                    <p className="text-xs text-gray-600">© 2026 Personal Dashboard</p>
+                <div className="px-4 py-4 border-t border-dark-600 space-y-3">
+                    {onLogout && (
+                        <button
+                            onClick={onLogout}
+                            className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-900/20 transition-all duration-200"
+                        >
+                            <LogOut size={16} />
+                            Log Out
+                        </button>
+                    )}
+                    <p className="text-xs text-gray-600 px-2">© 2026 Personal Dashboard</p>
                 </div>
             </aside>
 
