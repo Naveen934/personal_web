@@ -72,6 +72,7 @@ export default function DocumentsTab() {
     const [docs, setDocs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
+    const [editCell, setEditCell] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
 
     const load = async () => {
