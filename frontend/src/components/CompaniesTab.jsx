@@ -16,12 +16,75 @@ const STATUS_OPTIONS = ['Working', 'Future Planning', 'In Process', 'Closed'];
 
 const EMPTY_FORM = { name: '', status: 'Working', monthly_revenue: '', total_invested: '', notes: '' };
 
+const AddCompanyModal = ({ onClose, onSuccess }) => {
+    const [form, setForm] = useState(EMPTY_FORM);
+    const [saving, setSaving] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            await createCompany({ ...form, monthly_revenue: +form.monthly_revenue, total_invested: +form.total_invested });
+            onSuccess();
+        } catch (err) { console.error(err); }
+        finally { setSaving(false); }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+            <div className="bg-dark-700 border border-dark-500 rounded-2xl w-full max-w-md shadow-2xl">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
+                    <h2 className="font-semibold text-white">Add Company</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-white">
+                        <X size={20} />
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Company Name *</label>
+                        <input className="input-field" required value={form.name} placeholder="e.g. Chain Company"
+                            onChange={e => setForm({ ...form, name: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Status *</label>
+                        <select className="input-field" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Monthly Revenue (₹)</label>
+                            <input type="number" className="input-field" placeholder="9000" value={form.monthly_revenue}
+                                onChange={e => setForm({ ...form, monthly_revenue: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Total Invested (₹)</label>
+                            <input type="number" className="input-field" placeholder="300000" value={form.total_invested}
+                                onChange={e => setForm({ ...form, total_invested: e.target.value })} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Notes</label>
+                        <textarea className="input-field resize-none h-20" placeholder="Optional notes..." value={form.notes}
+                            onChange={e => setForm({ ...form, notes: e.target.value })} />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose}
+                            className="flex-1 btn-ghost justify-center border border-dark-400">Cancel</button>
+                        <button type="submit" disabled={saving} className="flex-1 btn-primary justify-center">
+                            {saving ? 'Saving...' : 'Add Company'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 export default function CompaniesTab() {
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [form, setForm] = useState(EMPTY_FORM);
-    const [saving, setSaving] = useState(false);
     const [detail, setDetail] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
 
@@ -32,16 +95,6 @@ export default function CompaniesTab() {
     };
 
     useEffect(() => { load(); }, []);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            await createCompany({ ...form, monthly_revenue: +form.monthly_revenue, total_invested: +form.total_invested });
-            setShowForm(false); setForm(EMPTY_FORM); await load();
-        } catch (err) { console.error(err); }
-        finally { setSaving(false); }
-    };
 
     const handleDelete = async (id) => {
         try { await deleteCompany(id); setDeleteConfirm(null); await load(); }
@@ -140,53 +193,10 @@ export default function CompaniesTab() {
 
             {/* Add Form Modal */}
             {showForm && (
-                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-                    <div className="bg-dark-700 border border-dark-500 rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
-                            <h2 className="font-semibold text-white">Add Company</h2>
-                            <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} className="text-gray-500 hover:text-white">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Company Name *</label>
-                                <input className="input-field" required value={form.name} placeholder="e.g. Chain Company"
-                                    onChange={e => setForm({ ...form, name: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Status *</label>
-                                <select className="input-field" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-                                    {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Monthly Revenue (₹)</label>
-                                    <input type="number" className="input-field" placeholder="9000" value={form.monthly_revenue}
-                                        onChange={e => setForm({ ...form, monthly_revenue: e.target.value })} />
-                                </div>
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Total Invested (₹)</label>
-                                    <input type="number" className="input-field" placeholder="300000" value={form.total_invested}
-                                        onChange={e => setForm({ ...form, total_invested: e.target.value })} />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Notes</label>
-                                <textarea className="input-field resize-none h-20" placeholder="Optional notes..." value={form.notes}
-                                    onChange={e => setForm({ ...form, notes: e.target.value })} />
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
-                                    className="flex-1 btn-ghost justify-center border border-dark-400">Cancel</button>
-                                <button type="submit" disabled={saving} className="flex-1 btn-primary justify-center">
-                                    {saving ? 'Saving...' : 'Add Company'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <AddCompanyModal
+                    onClose={() => setShowForm(false)}
+                    onSuccess={() => { setShowForm(false); load(); }}
+                />
             )}
 
             {/* Detail Modal */}

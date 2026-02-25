@@ -34,12 +34,82 @@ function SavingCard({ item, onDelete }) {
     );
 }
 
+const AddSavingsModal = ({ onClose, onSuccess }) => {
+    const [form, setForm] = useState(EMPTY_FORM);
+    const [saving, setSaving] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            await createSaving({ ...form, value: +form.value });
+            onSuccess();
+        } catch (err) { console.error(err); }
+        finally { setSaving(false); }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+            <div className="bg-dark-700 border border-dark-500 rounded-2xl w-full max-w-md shadow-2xl">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
+                    <h2 className="font-semibold text-white">Add Savings Entry</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-white"><X size={20} /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Category *</label>
+                            <select className="input-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Type *</label>
+                            <select className="input-field" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+                                <option value="asset">Asset</option>
+                                <option value="liability">Liability</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Subcategory</label>
+                        <input className="input-field" placeholder="e.g. Holdings, Loan" value={form.subcategory}
+                            onChange={e => setForm({ ...form, subcategory: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Quantity / Grams</label>
+                            <input className="input-field" placeholder="e.g. 6g, 10 units" value={form.quantity}
+                                onChange={e => setForm({ ...form, quantity: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Value (₹) *</label>
+                            <input type="number" className="input-field" required placeholder="65000" value={form.value}
+                                onChange={e => setForm({ ...form, value: e.target.value })} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Notes</label>
+                        <input className="input-field" placeholder="Any additional info" value={form.notes}
+                            onChange={e => setForm({ ...form, notes: e.target.value })} />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose}
+                            className="flex-1 btn-ghost justify-center border border-dark-400">Cancel</button>
+                        <button type="submit" disabled={saving} className="flex-1 btn-primary justify-center">
+                            {saving ? 'Saving...' : 'Add Entry'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 export default function SavingsTab() {
     const [savings, setSavings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [form, setForm] = useState(EMPTY_FORM);
-    const [saving, setSaving] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
 
     const load = async () => {
@@ -53,16 +123,6 @@ export default function SavingsTab() {
     const totalAssets = savings.filter(s => s.type === 'asset').reduce((sum, s) => sum + (s.value || 0), 0);
     const totalLiabilities = savings.filter(s => s.type === 'liability').reduce((sum, s) => sum + Math.abs(s.value || 0), 0);
     const netWorth = totalAssets - totalLiabilities;
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            await createSaving({ ...form, value: +form.value });
-            setShowForm(false); setForm(EMPTY_FORM); await load();
-        } catch (err) { console.error(err); }
-        finally { setSaving(false); }
-    };
 
     const handleDelete = async (item) => {
         try { await deleteSaving(item.id); setDeleteConfirm(null); await load(); }
@@ -132,60 +192,10 @@ export default function SavingsTab() {
 
             {/* Add Form Modal */}
             {showForm && (
-                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-                    <div className="bg-dark-700 border border-dark-500 rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
-                            <h2 className="font-semibold text-white">Add Savings Entry</h2>
-                            <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} className="text-gray-500 hover:text-white"><X size={20} /></button>
-                        </div>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Category *</label>
-                                    <select className="input-field" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Type *</label>
-                                    <select className="input-field" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
-                                        <option value="asset">Asset</option>
-                                        <option value="liability">Liability</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Subcategory</label>
-                                <input className="input-field" placeholder="e.g. Holdings, Loan" value={form.subcategory}
-                                    onChange={e => setForm({ ...form, subcategory: e.target.value })} />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Quantity / Grams</label>
-                                    <input className="input-field" placeholder="e.g. 6g, 10 units" value={form.quantity}
-                                        onChange={e => setForm({ ...form, quantity: e.target.value })} />
-                                </div>
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Value (₹) *</label>
-                                    <input type="number" className="input-field" required placeholder="65000" value={form.value}
-                                        onChange={e => setForm({ ...form, value: e.target.value })} />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Notes</label>
-                                <input className="input-field" placeholder="Any additional info" value={form.notes}
-                                    onChange={e => setForm({ ...form, notes: e.target.value })} />
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
-                                    className="flex-1 btn-ghost justify-center border border-dark-400">Cancel</button>
-                                <button type="submit" disabled={saving} className="flex-1 btn-primary justify-center">
-                                    {saving ? 'Saving...' : 'Add Entry'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <AddSavingsModal
+                    onClose={() => setShowForm(false)}
+                    onSuccess={() => { setShowForm(false); load(); }}
+                />
             )}
 
             {/* Delete Confirm */}

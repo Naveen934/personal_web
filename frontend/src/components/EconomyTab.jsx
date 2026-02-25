@@ -9,12 +9,68 @@ const ACCOUNT_TYPES = ['Savings', 'Current', 'Fixed Deposit', 'Loan', 'Other'];
 
 const EMPTY_FORM = { bank_name: '', account_type: 'Savings', balance: '', notes: '' };
 
+const AddEconomyModal = ({ onClose, onSuccess }) => {
+    const [form, setForm] = useState(EMPTY_FORM);
+    const [saving, setSaving] = useState(false);
+
+    const handleSubmit = async (ev) => {
+        ev.preventDefault();
+        setSaving(true);
+        try {
+            await createEconomy({ ...form, balance: +form.balance });
+            onSuccess();
+        } catch (err) { console.error(err); }
+        finally { setSaving(false); }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+            <div className="bg-dark-700 border border-dark-500 rounded-2xl w-full max-w-md shadow-2xl">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
+                    <h2 className="font-semibold text-white">Add Bank Account</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-white"><X size={20} /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Bank Name *</label>
+                        <input className="input-field" required placeholder="e.g. SBI, HDFC" value={form.bank_name}
+                            onChange={e => setForm({ ...form, bank_name: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Account Type</label>
+                            <select className="input-field" value={form.account_type} onChange={e => setForm({ ...form, account_type: e.target.value })}>
+                                {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Balance (₹) *</label>
+                            <input type="number" className="input-field" required placeholder="16000 (use - for loans)"
+                                value={form.balance} onChange={e => setForm({ ...form, balance: e.target.value })} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Notes</label>
+                        <input className="input-field" placeholder="e.g. No active loans" value={form.notes}
+                            onChange={e => setForm({ ...form, notes: e.target.value })} />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose}
+                            className="flex-1 btn-ghost justify-center border border-dark-400">Cancel</button>
+                        <button type="submit" disabled={saving} className="flex-1 btn-primary justify-center">
+                            {saving ? 'Saving...' : 'Add Account'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 export default function EconomyTab() {
     const [entries, setEntries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [form, setForm] = useState(EMPTY_FORM);
-    const [saving, setSaving] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
 
     const load = async () => {
@@ -28,16 +84,6 @@ export default function EconomyTab() {
     const totalBalance = entries.reduce((sum, e) => sum + (e.balance || 0), 0);
     const totalPositive = entries.filter(e => e.balance >= 0).reduce((sum, e) => sum + e.balance, 0);
     const totalNegative = entries.filter(e => e.balance < 0).reduce((sum, e) => sum + e.balance, 0);
-
-    const handleSubmit = async (ev) => {
-        ev.preventDefault();
-        setSaving(true);
-        try {
-            await createEconomy({ ...form, balance: +form.balance });
-            setShowForm(false); setForm(EMPTY_FORM); await load();
-        } catch (err) { console.error(err); }
-        finally { setSaving(false); }
-    };
 
     const handleDelete = async (entry) => {
         try { await deleteEconomy(entry.id); setDeleteConfirm(null); await load(); }
@@ -117,46 +163,10 @@ export default function EconomyTab() {
 
             {/* Add Form Modal */}
             {showForm && (
-                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-                    <div className="bg-dark-700 border border-dark-500 rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
-                            <h2 className="font-semibold text-white">Add Bank Account</h2>
-                            <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} className="text-gray-500 hover:text-white"><X size={20} /></button>
-                        </div>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Bank Name *</label>
-                                <input className="input-field" required placeholder="e.g. SBI, HDFC" value={form.bank_name}
-                                    onChange={e => setForm({ ...form, bank_name: e.target.value })} />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Account Type</label>
-                                    <select className="input-field" value={form.account_type} onChange={e => setForm({ ...form, account_type: e.target.value })}>
-                                        {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-xs text-gray-400 mb-1 block">Balance (₹) *</label>
-                                    <input type="number" className="input-field" required placeholder="16000 (use - for loans)"
-                                        value={form.balance} onChange={e => setForm({ ...form, balance: e.target.value })} />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Notes</label>
-                                <input className="input-field" placeholder="e.g. No active loans" value={form.notes}
-                                    onChange={e => setForm({ ...form, notes: e.target.value })} />
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
-                                    className="flex-1 btn-ghost justify-center border border-dark-400">Cancel</button>
-                                <button type="submit" disabled={saving} className="flex-1 btn-primary justify-center">
-                                    {saving ? 'Saving...' : 'Add Account'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <AddEconomyModal
+                    onClose={() => setShowForm(false)}
+                    onSuccess={() => { setShowForm(false); load(); }}
+                />
             )}
 
             {/* Delete Confirm */}
