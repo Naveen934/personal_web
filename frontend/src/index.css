@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-900 text-gray-100 font-sans;
+  }
+  * {
+    @apply border-dark-400;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-brand-900/30;
+  }
+  .btn-ghost {
+    @apply px-3 py-1.5 text-gray-400 hover:text-white hover:bg-dark-600 rounded-lg transition-all duration-200 flex items-center gap-1.5;
+  }
+  .card {
+    @apply bg-dark-700 border border-dark-500 rounded-xl p-5 shadow-xl;
+  }
+  .input-field {
+    @apply bg-dark-600 border border-dark-400 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all w-full;
+  }
+  .badge-working {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50;
+  }
+  .badge-future {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-900/60 text-blue-300 border border-blue-700/50;
+  }
+  .badge-process {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-900/60 text-amber-300 border border-amber-700/50;
+  }
+  .badge-closed {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-900/60 text-red-300 border border-red-700/50;
+  }
+}
