@@ -12,14 +12,13 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://your-app.netlify.app",   # Replace with your Netlify URL after deploy
+        "https://naveen-ja.netlify.app",  # Your Netlify frontend
         "http://localhost:5173",
         "http://localhost:3000",
-        "*",  # Remove this in production and set the specific domain above
     ],
     allow_credentials=True,
-    allow_methods=["https://naveen-ja.netlify.app/"],
-    allow_headers=["https://naveen-ja.netlify.app/"],
+    allow_methods=["*"],   # HTTP methods: GET, POST, PUT, DELETE, etc.
+    allow_headers=["*"],   # HTTP headers: Content-Type, Authorization, etc.
 )
 
 # Register routers
