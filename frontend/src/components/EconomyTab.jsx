@@ -33,15 +33,18 @@ export default function EconomyTab() {
         ev.preventDefault();
         setSaving(true);
         try {
-            await createEconomy({ ...form, balance: +form.balance });
-            setShowForm(false); setForm(EMPTY_FORM); await load();
+            const added = await createEconomy({ ...form, balance: +form.balance });
+            setEntries(prev => [added, ...prev]);
+            setShowForm(false); setForm(EMPTY_FORM);
         } catch (err) { console.error(err); }
         finally { setSaving(false); }
     };
 
     const handleDelete = async (entry) => {
-        try { await deleteEconomy(entry.id); setDeleteConfirm(null); await load(); }
-        catch (e) { console.error(e); }
+        setEntries(prev => prev.filter(e => e.id !== entry.id));
+        setDeleteConfirm(null);
+        try { await deleteEconomy(entry.id); }
+        catch (e) { console.error(e); await load(); }
     };
 
     if (loading) return <div className="flex items-center justify-center h-64 text-gray-500">Loading...</div>;
