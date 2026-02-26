@@ -10,14 +10,20 @@ import './index.css';
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('companies');
+  const [mountedTabs, setMountedTabs] = useState(['companies']);
 
   useEffect(() => {
     const auth = localStorage.getItem('personal_dashboard_auth');
     if (auth === 'true') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAuthenticated(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!mountedTabs.includes(activeTab)) {
+      setMountedTabs((prev) => [...prev, activeTab]);
+    }
+  }, [activeTab, mountedTabs]);
 
   const handleLogin = () => {
     localStorage.setItem('personal_dashboard_auth', 'true');
@@ -37,16 +43,16 @@ export default function App() {
     <Layout activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
       <div className="animate-[fadeIn_0.2s_ease-in-out]">
         <div className={activeTab === 'companies' ? 'block' : 'hidden'}>
-          <CompaniesTab />
+          {mountedTabs.includes('companies') && <CompaniesTab />}
         </div>
         <div className={activeTab === 'savings' ? 'block' : 'hidden'}>
-          <SavingsTab />
+          {mountedTabs.includes('savings') && <SavingsTab />}
         </div>
         <div className={activeTab === 'economy' ? 'block' : 'hidden'}>
-          <EconomyTab />
+          {mountedTabs.includes('economy') && <EconomyTab />}
         </div>
         <div className={activeTab === 'documents' ? 'block' : 'hidden'}>
-          <DocumentsTab />
+          {mountedTabs.includes('documents') && <DocumentsTab />}
         </div>
       </div>
     </Layout>
