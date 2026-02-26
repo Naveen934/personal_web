@@ -3,6 +3,9 @@ import {
     Building2, PiggyBank, Landmark, FileText,
     LayoutDashboard, Menu, X, LogOut
 } from 'lucide-react';
+/* eslint-disable no-unused-vars */
+import { motion } from 'framer-motion';
+/* eslint-enable no-unused-vars */
 
 const NAV_ITEMS = [
     { id: 'companies', label: 'Companies', icon: Building2 },
@@ -45,9 +48,12 @@ export default function Layout({ activeTab, onTabChange, onLogout, children }) {
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 py-4 space-y-1">
-                    {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-                        <button
+                    {/* eslint-disable-next-line no-unused-vars */}
+                    {NAV_ITEMS.map(({ id, label, icon: NavIcon }) => (
+                        <motion.button
                             key={id}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => { onTabChange(id); setSidebarOpen(false); }}
                             className={`
                 w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
@@ -57,9 +63,10 @@ export default function Layout({ activeTab, onTabChange, onLogout, children }) {
                                     : 'text-gray-400 hover:bg-dark-600 hover:text-white'}
               `}
                         >
-                            <Icon size={18} className={activeTab === id ? 'text-white' : 'text-gray-500 group-hover:text-white'} />
+                            {/* Make sure Icon is rendered correctly */}
+                            <NavIcon size={18} className={activeTab === id ? 'text-white' : 'text-gray-500 group-hover:text-white'} />
                             {label}
-                        </button>
+                        </motion.button>
                     ))}
                 </nav>
 

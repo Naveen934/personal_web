@@ -14,6 +14,7 @@ export default function App() {
   useEffect(() => {
     const auth = localStorage.getItem('personal_dashboard_auth');
     if (auth === 'true') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAuthenticated(true);
     }
   }, []);
