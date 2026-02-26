@@ -29,24 +29,25 @@ export default function App() {
     setIsAuthenticated(false);
   };
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'companies': return <CompaniesTab />;
-      case 'savings': return <SavingsTab />;
-      case 'economy': return <EconomyTab />;
-      case 'documents': return <DocumentsTab />;
-      default: return <CompaniesTab />;
-    }
-  };
-
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
   }
 
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
-      <div key={activeTab} className="animate-[fadeIn_0.2s_ease-in-out]">
-        {renderTab()}
+      <div className="animate-[fadeIn_0.2s_ease-in-out]">
+        <div className={activeTab === 'companies' ? 'block' : 'hidden'}>
+          <CompaniesTab />
+        </div>
+        <div className={activeTab === 'savings' ? 'block' : 'hidden'}>
+          <SavingsTab />
+        </div>
+        <div className={activeTab === 'economy' ? 'block' : 'hidden'}>
+          <EconomyTab />
+        </div>
+        <div className={activeTab === 'documents' ? 'block' : 'hidden'}>
+          <DocumentsTab />
+        </div>
       </div>
     </Layout>
   );
