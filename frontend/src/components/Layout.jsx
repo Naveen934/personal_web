@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     Building2, PiggyBank, Landmark, FileText,
-    LayoutDashboard, Menu, X, LogOut
+    LayoutDashboard, Menu, X, LogOut, Receipt
 } from 'lucide-react';
 /* eslint-disable no-unused-vars */
 import { motion } from 'framer-motion';
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
     { id: 'companies', label: 'Companies', icon: Building2 },
     { id: 'savings', label: 'Savings', icon: PiggyBank },
     { id: 'economy', label: 'Bank', icon: Landmark },
+    { id: 'expenses', label: 'Expenses', icon: Receipt },
     { id: 'documents', label: 'Documents', icon: FileText },
 ];
 

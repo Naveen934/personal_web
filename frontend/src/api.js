@@ -28,3 +28,8 @@ export const getDocuments = () => api.get('/documents/').then(r => r.data);
 export const createDocument = (data) => api.post('/documents/', data).then(r => r.data);
 export const updateDocument = (id, data) => api.put(`/documents/${id}`, data).then(r => r.data);
 export const deleteDocument = (id) => api.delete(`/documents/${id}`);
+
+// Expenses
+export const getExpenses = () => api.get('/expenses/').then(r => r.data);
+export const createExpense = (data) => api.post('/expenses/', data).then(r => r.data);
+export const deleteExpense = (id) => api.delete(`/expenses/${id}`);

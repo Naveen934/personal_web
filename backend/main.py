@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import companies, savings, economy, documents
+from routes import companies, savings, economy, documents, expenses
 
 app = FastAPI(
     title="Personal Dashboard API",
@@ -26,6 +26,7 @@ app.include_router(companies.router)
 app.include_router(savings.router)
 app.include_router(economy.router)
 app.include_router(documents.router)
+app.include_router(expenses.router)
 
 
 @app.get("/")

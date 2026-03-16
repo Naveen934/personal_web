@@ -48,3 +48,14 @@ class Document(Base):
     number = Column(String, nullable=True)
     drive_link = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+
+
+class Expense(Base):
+    __tablename__ = "expenses"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    bill_name = Column(String, nullable=False)
+    amount = Column(Numeric(15, 2), default=0)
+    payment_type = Column(String, nullable=False)
+    notes = Column(Text, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())

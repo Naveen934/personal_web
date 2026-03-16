@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import CompaniesTab from './components/CompaniesTab';
 import SavingsTab from './components/SavingsTab';
 import EconomyTab from './components/EconomyTab';
+import ExpensesTab from './components/ExpensesTab';
 import DocumentsTab from './components/DocumentsTab';
 import Login from './components/Login';
 import './index.css';
@@ -50,6 +51,9 @@ export default function App() {
         </div>
         <div className={activeTab === 'economy' ? 'block' : 'hidden'}>
           {mountedTabs.includes('economy') && <EconomyTab />}
+        </div>
+        <div className={activeTab === 'expenses' ? 'block' : 'hidden'}>
+          {mountedTabs.includes('expenses') && <ExpensesTab />}
         </div>
         <div className={activeTab === 'documents' ? 'block' : 'hidden'}>
           {mountedTabs.includes('documents') && <DocumentsTab />}

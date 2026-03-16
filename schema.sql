@@ -58,3 +58,13 @@ CREATE TABLE IF NOT EXISTS documents (
 
 -- INSERT INTO documents (document_name, number, drive_link)
 -- VALUES ('Aadhar', '4855 4XXX XXXX', 'https://drive.google.com/');
+
+-- Expenses Table
+CREATE TABLE IF NOT EXISTS expenses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    bill_name TEXT NOT NULL,
+    amount NUMERIC(15, 2) DEFAULT 0,
+    payment_type TEXT NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
