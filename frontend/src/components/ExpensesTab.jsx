@@ -10,7 +10,7 @@ const formatINR = (n) =>
 
 const PAYMENT_TYPES = ['Credit Card', 'Debit Card', 'Cash', 'UPI', 'Net Banking', 'Other'];
 
-const EMPTY_FORM = { bill_name: '', amount: '', payment_type: 'Credit Card', notes: '' };
+const EMPTY_FORM = { bill_name: '', amount: '', payment_type: 'Credit Card', time_cycle_days: '', notes: '' };
 
 const AddExpenseModal = ({ onClose, onSuccess }) => {
     const [form, setForm] = useState(EMPTY_FORM);
@@ -20,7 +20,11 @@ const AddExpenseModal = ({ onClose, onSuccess }) => {
         ev.preventDefault();
         setSaving(true);
         try {
-            await createExpense({ ...form, amount: +form.amount });
+            await createExpense({
+                ...form,
+                amount: +form.amount,
+                time_cycle_days: form.time_cycle_days ? +form.time_cycle_days : null
+            });
             onSuccess();
         } catch (err) { console.error(err); }
         finally { setSaving(false); }
@@ -53,10 +57,15 @@ const AddExpenseModal = ({ onClose, onSuccess }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="text-xs text-gray-400 mb-1 block">Amount (₹) *</label>
-                            <input type="number" className="input-field" required placeholder="799" min="0" step="0.01"
-                                value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+                            <label className="text-xs text-gray-400 mb-1 block">Time Cycle (Days)</label>
+                            <input type="number" className="input-field" placeholder="e.g. 28" min="1"
+                                value={form.time_cycle_days} onChange={e => setForm({ ...form, time_cycle_days: e.target.value })} />
                         </div>
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Amount (₹) *</label>
+                        <input type="number" className="input-field" required placeholder="799" min="0" step="0.01"
+                            value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
                     </div>
                     <div>
                         <label className="text-xs text-gray-400 mb-1 block">Notes</label>
@@ -184,6 +193,11 @@ export default function ExpensesTab() {
                                         <div className="flex items-center gap-2">
                                             <p className="font-semibold text-white text-sm truncate">{entry.bill_name}</p>
                                             <span className="text-xs text-gray-500 bg-dark-600 px-2 py-0.5 rounded-full whitespace-nowrap">{entry.payment_type}</span>
+                                            {entry.time_cycle_days && (
+                                                <span className="text-xs text-brand-400 bg-brand-900/20 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                                    {entry.time_cycle_days} days cycle
+                                                </span>
+                                            )}
                                         </div>
                                         {entry.notes && <p className="text-xs text-gray-500 mt-0.5 truncate">{entry.notes}</p>}
                                     </div>

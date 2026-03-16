@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Numeric, Text, TIMESTAMP, func
+from sqlalchemy import Column, String, Numeric, Text, TIMESTAMP, func, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from database import Base
 
@@ -57,5 +57,6 @@ class Expense(Base):
     bill_name = Column(String, nullable=False)
     amount = Column(Numeric(15, 2), default=0)
     payment_type = Column(String, nullable=False)
+    time_cycle_days = Column(Integer, nullable=True)
     notes = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())

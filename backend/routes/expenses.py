@@ -14,6 +14,7 @@ class ExpenseCreate(BaseModel):
     bill_name: str
     amount: Optional[float] = 0
     payment_type: str
+    time_cycle_days: Optional[int] = None
     notes: Optional[str] = None
 
 
@@ -23,6 +24,7 @@ def serialize(e: Expense) -> dict:
         "bill_name": e.bill_name,
         "amount": float(e.amount or 0),
         "payment_type": e.payment_type,
+        "time_cycle_days": e.time_cycle_days,
         "notes": e.notes,
         "created_at": e.created_at.isoformat() if e.created_at else None,
     }

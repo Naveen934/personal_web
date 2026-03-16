@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS expenses (
     bill_name TEXT NOT NULL,
     amount NUMERIC(15, 2) DEFAULT 0,
     payment_type TEXT NOT NULL,
+    time_cycle_days INTEGER,
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
